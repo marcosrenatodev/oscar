@@ -1,0 +1,9 @@
+POST http://localhost:3000/votos/confirmar
+Content-Type: application/json
+
+{
+  "usuarioId": 1,
+  "filmeId": "10",
+  "diretorId": "15",
+  "token": 57
+}

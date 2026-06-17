@@ -1,0 +1,44 @@
+# Requests da oscar-api
+
+# 1. Health
+GET http://localhost:3000/health
+
+###
+
+# 2. Login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "login": "usuario1",
+  "senha": "123456"
+}
+
+###
+
+# 3. Confirmar voto
+# Troque o token abaixo pelo token retornado no login.
+POST http://localhost:3000/votos/confirmar
+Content-Type: application/json
+
+{
+  "usuarioId": 1,
+  "filmeId": "10",
+  "diretorId": "15",
+  "token": 57
+}
+
+###
+
+# 4. Consultar voto do usuário
+GET http://localhost:3000/usuarios/1/voto
+
+###
+
+# 5. Filmes
+GET http://localhost:3000/filmes
+
+###
+
+# 6. Diretores
+GET http://localhost:3000/diretores

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_inicio"
+        android:icon="@drawable/ic_nav_home"
+        android:title="Início" />
+    <item
+        android:id="@+id/nav_filme"
+        android:icon="@drawable/ic_nav_movie"
+        android:title="Filme" />
+    <item
+        android:id="@+id/nav_diretor"
+        android:icon="@drawable/ic_nav_director"
+        android:title="Diretor" />
+    <item
+        android:id="@+id/nav_confirmar"
+        android:icon="@drawable/ic_nav_confirm"
+        android:title="Confirmar" />
+</menu>

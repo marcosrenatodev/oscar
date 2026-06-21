@@ -2,4 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Paleta Cinematic Prestige -->
+    <color name="oscar_background">#0B0B0F</color>
+    <color name="oscar_surface">#16161D</color>
+    <color name="oscar_gold">#D4AF37</color>
+    <color name="oscar_gold_dark">#4D4226</color>
+    <color name="oscar_text_primary">#F6F1E7</color>
+    <color name="oscar_text_secondary">#9A958C</color>
+    <color name="oscar_chip_border">#5A5444</color>
+    <color name="oscar_placeholder">#1F1F28</color>
 </resources>

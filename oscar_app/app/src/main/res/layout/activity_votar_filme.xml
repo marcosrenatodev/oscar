@@ -5,6 +5,104 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_welcome_gradient"
     tools:context=".controller.VotarFilmeActivity">
 
+    <ImageView
+        android:id="@+id/posterImageView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@tools:sample/backgrounds/scenic" />
+
+    <ImageView
+        android:id="@+id/backButton"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_icon_button"
+        android:clickable="true"
+        android:contentDescription="Voltar"
+        android:focusable="true"
+        android:padding="10dp"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/nomeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/bodoni_moda"
+        android:fontVariationSettings="&quot;wght&quot; 700"
+        android:gravity="center"
+        android:textColor="@color/oscar_gold"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/posterImageView"
+        tools:text="Oppenheimer" />
+
+    <TextView
+        android:id="@+id/generoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_chip_genero"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="6dp"
+        android:textAllCaps="true"
+        android:textColor="@color/oscar_gold"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nomeTextView"
+        tools:text="DRAMA" />
+
+    <View
+        android:id="@+id/votarDivider"
+        android:layout_width="56dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="24dp"
+        android:alpha="0.7"
+        android:background="@color/oscar_gold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/generoTextView" />
+
+    <TextView
+        android:id="@+id/indicadoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:letterSpacing="0.05"
+        android:text="INDICADO A MELHOR FILME"
+        android:textColor="@color/oscar_text_secondary"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/votarDivider" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/votarButton"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="24dp"
+        android:letterSpacing="0.05"
+        android:text="VOTAR NESTE FILME"
+        android:textColor="@color/oscar_background"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/oscar_gold"
+        app:cornerRadius="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

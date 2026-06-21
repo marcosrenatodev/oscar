@@ -15,7 +15,9 @@ import androidx.lifecycle.lifecycleScope
 import com.ufpr.oscar_app.R
 import com.ufpr.oscar_app.model.LoginRequest
 import com.ufpr.oscar_app.service.RetrofitClient
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AuthActivity : AppCompatActivity() {
 
@@ -56,12 +58,9 @@ class AuthActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val response = RetrofitClient.api.login(
-                    LoginRequest(
-                        login = login,
-                        senha = senha
-                    )
-                )
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.api.login(LoginRequest(login, senha))
+                }
 
                 if (response.isSuccessful && response.body()?.sucesso == true) {
                     val body = response.body()

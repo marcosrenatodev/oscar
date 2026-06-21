@@ -5,14 +5,25 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
-    android:padding="24dp"
+    android:background="@drawable/bg_login_gradient"
     tools:context=".controller.AuthActivity">
+
+    <ImageView
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:alpha="0.07"
+        android:contentDescription="@null"
+        android:src="@drawable/trophy"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/authContainer"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="28dp"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -22,53 +33,84 @@
 
         <TextView
             android:id="@+id/textTitulo"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Oscar App"
-            android:textColor="@android:color/black"
-            android:textSize="30sp"
-            android:textStyle="bold" />
+            android:fontFamily="@font/bodoni_moda"
+            android:fontVariationSettings="&quot;wght&quot; 700"
+            android:letterSpacing="0.08"
+            android:text="OSCARS"
+            android:textColor="@color/oscar_gold"
+            android:textSize="52sp" />
 
         <TextView
             android:id="@+id/textSubtitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:letterSpacing="0.18"
+            android:text="ACADEMIA INTERNACIONAL DE CINEMA"
+            android:textColor="@color/oscar_text_secondary"
+            android:textSize="11sp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputLoginLayout"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="Entre para confirmar seu voto"
-            android:textColor="#666666"
-            android:textSize="16sp" />
+            android:layout_marginTop="56dp"
+            android:hint="Usuário"
+            app:boxBackgroundColor="@color/oscar_surface"
+            app:boxCornerRadiusBottomEnd="14dp"
+            app:boxCornerRadiusBottomStart="14dp"
+            app:boxCornerRadiusTopEnd="14dp"
+            app:boxCornerRadiusTopStart="14dp"
+            app:boxStrokeColor="@color/oscar_gold"
+            app:hintTextColor="@color/oscar_text_secondary"
+            app:startIconDrawable="@drawable/ic_person"
+            app:startIconTint="@color/oscar_text_secondary">
 
-        <EditText
-            android:id="@+id/editLogin"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="40dp"
-            android:autofillHints="username"
-            android:background="@android:drawable/edit_text"
-            android:hint="Login"
-            android:imeOptions="actionNext"
-            android:inputType="text"
-            android:maxLines="1"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:singleLine="true" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="username"
+                android:imeOptions="actionNext"
+                android:inputType="text"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@color/oscar_text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <EditText
-            android:id="@+id/editSenha"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputSenhaLayout"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:autofillHints="password"
-            android:background="@android:drawable/edit_text"
             android:hint="Senha"
-            android:imeOptions="actionDone"
-            android:inputType="textPassword"
-            android:maxLines="1"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:singleLine="true" />
+            app:boxBackgroundColor="@color/oscar_surface"
+            app:boxCornerRadiusBottomEnd="14dp"
+            app:boxCornerRadiusBottomStart="14dp"
+            app:boxCornerRadiusTopEnd="14dp"
+            app:boxCornerRadiusTopStart="14dp"
+            app:boxStrokeColor="@color/oscar_gold"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/oscar_text_secondary"
+            app:hintTextColor="@color/oscar_text_secondary"
+            app:startIconDrawable="@drawable/ic_lock"
+            app:startIconTint="@color/oscar_text_secondary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editSenha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="password"
+                android:imeOptions="actionDone"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@color/oscar_text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:id="@+id/textErroLogin"
@@ -76,31 +118,56 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:gravity="center"
-            android:textColor="#B00020"
+            android:textColor="#E57373"
             android:textSize="14sp"
             android:visibility="gone"
             tools:text="Login ou senha inválidos"
             tools:visibility="visible" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonEntrar"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="28dp"
+            android:letterSpacing="0.05"
             android:onClick="login"
-            android:text="Entrar"
-            android:textAllCaps="false"
-            android:textSize="16sp" />
+            android:text="ENTRAR"
+            android:textColor="@color/oscar_background"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/oscar_gold"
+            app:cornerRadius="16dp" />
 
         <ProgressBar
             android:id="@+id/progressLogin"
-            style="?android:attr/progressBarStyle"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginTop="20dp"
+            android:indeterminateTint="@color/oscar_gold"
             android:visibility="gone"
             tools:visibility="visible" />
 
+        <TextView
+            android:id="@+id/textEsqueceuSenha"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:letterSpacing="0.05"
+            android:text="ESQUECEU A SENHA?"
+            android:textColor="@color/oscar_gold"
+            android:textSize="12sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/textRodape"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="Academia Internacional de Cinema · 2026"
+        android:textColor="@color/oscar_text_secondary"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

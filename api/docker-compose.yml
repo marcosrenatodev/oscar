@@ -1,0 +1,19 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: oscar-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      HOST: 0.0.0.0
+      # grava o banco dentro da pasta /data, que é persistida no volume abaixo
+      DATABASE_FILE: ./data/database.sqlite
+    volumes:
+      - oscar-db:/usr/src/app/data
+
+volumes:
+  oscar-db:

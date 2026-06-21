@@ -1,0 +1,2 @@
+# Scripts locais de rede (especificos da maquina de cada dev)
+scripts/toggle-api-bridge.ps1

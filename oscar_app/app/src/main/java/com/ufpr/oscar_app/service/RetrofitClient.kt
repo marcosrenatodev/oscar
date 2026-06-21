@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    private const val BASE_URL = "http://192.168.100.115:3000/"
+    private const val BASE_URL = "http://192.168.100.110:3000/"
 
     val api: OscarApi by lazy {
         Retrofit.Builder()

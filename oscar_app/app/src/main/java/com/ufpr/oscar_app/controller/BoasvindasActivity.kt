@@ -103,6 +103,8 @@ class BoasvindasActivity : AppCompatActivity() {
      */
     private fun sincronizarConfirmacao() {
         val votoDAO = VotoLocalDAO(this)
+        votoDAO.excluirPorUsuario(usuarioId)
+
         lifecycleScope.launch {
             try {
                 val response = withContext(Dispatchers.IO) {

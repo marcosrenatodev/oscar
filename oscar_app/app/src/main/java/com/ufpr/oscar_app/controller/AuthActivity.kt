@@ -31,12 +31,25 @@ class AuthActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_auth)
+        configurarInsets()
+        referenciarViews()
+    }
+
+    /**
+     * Aplica o padding das barras do sistema na raiz da tela.
+     */
+    private fun configurarInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
             insets
         }
+    }
 
+    /**
+     * Liga as views do formulario de login aos campos da classe.
+     */
+    private fun referenciarViews() {
         editLogin = findViewById(R.id.editLogin)
         editSenha = findViewById(R.id.editSenha)
         textErroLogin = findViewById(R.id.textErroLogin)
@@ -44,6 +57,11 @@ class AuthActivity : AppCompatActivity() {
         progressLogin = findViewById(R.id.progressLogin)
     }
 
+    /**
+     * CHAMADA DE API: POST auth/login.
+     * Valida os campos, envia login e senha e, no sucesso, abre a tela de boas-vindas
+     * repassando os dados do usuario e o token. Acionada pelo botao Entrar (onClick).
+     */
     fun login(view: View) {
         val login = editLogin.text.toString().trim()
         val senha = editSenha.text.toString().trim()
@@ -85,11 +103,17 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Exibe uma mensagem de erro abaixo do formulario.
+     */
     private fun mostrarErro(mensagem: String) {
         textErroLogin.text = mensagem
         textErroLogin.visibility = View.VISIBLE
     }
 
+    /**
+     * Valida que login e senha nao estao em branco antes do envio.
+     */
     private fun validarCampos(login: String, senha: String): Boolean {
         var valido = true
 

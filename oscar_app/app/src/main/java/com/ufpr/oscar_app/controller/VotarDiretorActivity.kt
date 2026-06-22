@@ -3,6 +3,7 @@ package com.ufpr.oscar_app.controller
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
@@ -18,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.ufpr.oscar_app.R
+import com.ufpr.oscar_app.data.dao.VotoLocalDAO
 import com.ufpr.oscar_app.model.Diretor
 import com.ufpr.oscar_app.service.RetrofitClient
 import kotlinx.coroutines.Dispatchers
@@ -30,8 +32,10 @@ class VotarDiretorActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var erroTextView: TextView
     private lateinit var votarButton: Button
+    private lateinit var votoDAO: VotoLocalDAO
 
     private var diretorSelecionado: Diretor? = null
+    private var diretorVotadoId: String? = null
 
     private var usuarioId: Int = -1
     private var usuarioNome: String? = null
@@ -42,7 +46,16 @@ class VotarDiretorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_votar_diretor)
+        configurarBarraNavegacao()
+        lerExtras()
+        referenciarViews()
+        carregarDiretores()
+    }
 
+    /**
+     * Aplica o padding das barras do sistema e configura a barra de navegação inferior.
+     */
+    private fun configurarBarraNavegacao() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -50,34 +63,6 @@ class VotarDiretorActivity : AppCompatActivity() {
             bottomNav.setPadding(0, 0, 0, bars.bottom)
             insets
         }
-
-        usuarioId = intent.getIntExtra("usuarioId", -1)
-        usuarioNome = intent.getStringExtra("usuarioNome")
-        usuarioLogin = intent.getStringExtra("usuarioLogin")
-        token = intent.getIntExtra("token", -1)
-
-        radioGroup = findViewById(R.id.diretoresRadioGroup)
-        progressBar = findViewById(R.id.progressBar)
-        erroTextView = findViewById(R.id.erroTextView)
-        votarButton = findViewById(R.id.votarButton)
-
-        votarButton.isEnabled = false
-        votarButton.setOnClickListener { view ->
-            if (diretorSelecionado != null) {
-                // Voto registrado apenas localmente; o envio real ocorre na tela Confirmar Voto.
-                Snackbar.make(
-                    view,
-                    "Voto registrado — você pode trocar até a confirmação final",
-                    Snackbar.LENGTH_LONG
-                ).show()
-            }
-        }
-
-        configurarBottomNav(bottomNav)
-        carregarDiretores()
-    }
-
-    private fun configurarBottomNav(bottomNav: BottomNavigationView) {
         bottomNav.selectedItemId = R.id.nav_diretor
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -99,6 +84,33 @@ class VotarDiretorActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Lê os dados do usuário e o token recebidos via Intent.
+     */
+    private fun lerExtras() {
+        usuarioId = intent.getIntExtra("usuarioId", -1)
+        usuarioNome = intent.getStringExtra("usuarioNome")
+        usuarioLogin = intent.getStringExtra("usuarioLogin")
+        token = intent.getIntExtra("token", -1)
+    }
+
+    /**
+     * Liga as views da tela, instancia o DAO e configura o botão de salvar voto.
+     */
+    private fun referenciarViews() {
+        radioGroup = findViewById(R.id.diretoresRadioGroup)
+        progressBar = findViewById(R.id.progressBar)
+        erroTextView = findViewById(R.id.erroTextView)
+        votarButton = findViewById(R.id.votarButton)
+        votoDAO = VotoLocalDAO(this)
+
+        votarButton.isEnabled = false
+        votarButton.setOnClickListener { registrarVotoLocal(it) }
+    }
+
+    /**
+     * Abre outra aba reaproveitando a Activity existente e repassando a sessão.
+     */
     @Suppress("DEPRECATION")
     private fun abrirAba(destino: Class<*>) {
         val intent = Intent(this, destino)
@@ -111,6 +123,10 @@ class VotarDiretorActivity : AppCompatActivity() {
         overridePendingTransition(0, 0)
     }
 
+    /**
+     * CHAMADA DE API: GET /diretores.
+     * Carrega os diretores de forma assíncrona, exibindo a ProgressBar durante o carregamento.
+     */
     private fun carregarDiretores() {
         progressBar.visibility = View.VISIBLE
         radioGroup.visibility = View.GONE
@@ -132,6 +148,10 @@ class VotarDiretorActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * BIND: monta o RadioGroup dinamicamente, um RadioButton por diretor retornado,
+     * e restaura o voto salvo localmente.
+     */
     private fun exibirDiretores(diretores: List<Diretor>) {
         radioGroup.removeAllViews()
         diretorSelecionado = null
@@ -144,8 +164,7 @@ class VotarDiretorActivity : AppCompatActivity() {
         }
 
         diretores.forEach { diretor ->
-            val radioButton = criarRadioButton(diretor)
-            radioGroup.addView(radioButton)
+            radioGroup.addView(criarRadioButton(diretor))
         }
 
         radioGroup.setOnCheckedChangeListener { group, checkedId ->
@@ -153,18 +172,25 @@ class VotarDiretorActivity : AppCompatActivity() {
             diretorSelecionado = selecionado?.tag as? Diretor
             votarButton.isEnabled = diretorSelecionado != null
         }
+
         radioGroup.visibility = View.VISIBLE
+        restaurarVotoLocal()
     }
 
+    /**
+     * Cria um RadioButton estilizado: radio à esquerda, nome, estrela vazia à direita
+     * e destaque de borda/fundo quando selecionado.
+     */
     private fun criarRadioButton(diretor: Diretor): RadioButton {
         val density = resources.displayMetrics.density
-        val checkedStates = arrayOf(
-            intArrayOf(android.R.attr.state_checked),
-            intArrayOf()
-        )
-        val tintColors = intArrayOf(
+        val estados = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
+        val coresBotao = intArrayOf(
             ContextCompat.getColor(this, R.color.oscar_gold),
             ContextCompat.getColor(this, R.color.oscar_text_secondary)
+        )
+        val coresTexto = intArrayOf(
+            ContextCompat.getColor(this, R.color.oscar_gold),
+            ContextCompat.getColor(this, R.color.oscar_text_primary)
         )
 
         return RadioButton(this).apply {
@@ -172,18 +198,80 @@ class VotarDiretorActivity : AppCompatActivity() {
             tag = diretor
             text = diretor.nome
             textSize = 17f
-            setTextColor(ContextCompat.getColor(context, R.color.oscar_text_primary))
-            buttonTintList = ColorStateList(checkedStates, tintColors)
+            gravity = Gravity.CENTER_VERTICAL
+            background = ContextCompat.getDrawable(context, R.drawable.bg_radio_item)
+            buttonTintList = ColorStateList(estados, coresBotao)
+            setTextColor(ColorStateList(estados, coresTexto))
+            compoundDrawablePadding = (8 * density).toInt()
+            setCompoundDrawablesRelativeWithIntrinsicBounds(
+                null, null,
+                ContextCompat.getDrawable(context, R.drawable.ic_star_outline),
+                null
+            )
             setPadding(
-                (8 * density).toInt(),
-                (14 * density).toInt(),
-                (8 * density).toInt(),
-                (14 * density).toInt()
+                (16 * density).toInt(),
+                (16 * density).toInt(),
+                (16 * density).toInt(),
+                (16 * density).toInt()
             )
             layoutParams = RadioGroup.LayoutParams(
                 RadioGroup.LayoutParams.MATCH_PARENT,
                 RadioGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = (12 * density).toInt()
+            }
+        }
+    }
+
+    /**
+     * Lê o voto local salvo e, se houver diretor votado, marca o radio e preenche a estrela.
+     */
+    private fun restaurarVotoLocal() {
+        val votadoId = votoDAO.buscarPorUsuario(usuarioId)?.diretorId ?: return
+        diretorVotadoId = votadoId
+
+        for (i in 0 until radioGroup.childCount) {
+            val radioButton = radioGroup.getChildAt(i) as RadioButton
+            if ((radioButton.tag as? Diretor)?.id == votadoId) {
+                radioButton.isChecked = true
+            }
+        }
+        atualizarEstrelas(votadoId)
+    }
+
+    /**
+     * Preenche a estrela do diretor votado e deixa as demais vazias.
+     */
+    private fun atualizarEstrelas(votadoId: String?) {
+        for (i in 0 until radioGroup.childCount) {
+            val radioButton = radioGroup.getChildAt(i) as RadioButton
+            val diretor = radioButton.tag as? Diretor
+            val estrela = if (diretor?.id == votadoId) {
+                R.drawable.ic_star_filled
+            } else {
+                R.drawable.ic_star_outline
+            }
+            radioButton.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                null, null, ContextCompat.getDrawable(this, estrela), null
             )
         }
+    }
+
+    /**
+     * Persiste localmente o voto no diretor selecionado (SQLite) e preenche a estrela dele.
+     * O envio real ocorre apenas na tela de confirmação.
+     */
+    private fun registrarVotoLocal(view: View) {
+        val diretor = diretorSelecionado ?: return
+
+        votoDAO.salvarDiretor(usuarioId, diretor)
+        diretorVotadoId = diretor.id
+        atualizarEstrelas(diretor.id)
+
+        Snackbar.make(
+            view,
+            "Voto registrado. Você pode trocar até a confirmação final.",
+            Snackbar.LENGTH_LONG
+        ).show()
     }
 }

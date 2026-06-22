@@ -44,6 +44,25 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/seuVotoBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/bg_badge_voto"
+                android:drawableStart="@drawable/ic_check"
+                android:drawablePadding="4dp"
+                android:letterSpacing="0.05"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:text="SEU VOTO"
+                android:textColor="@color/oscar_background"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <TextView
                 android:id="@+id/nomeTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

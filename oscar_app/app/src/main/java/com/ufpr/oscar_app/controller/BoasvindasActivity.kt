@@ -26,33 +26,22 @@ class BoasvindasActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_boasvindas)
+        configurarBarraNavegacao()
+        lerExtras()
+        exibirDados()
+    }
 
+    /**
+     * Aplica o padding das barras do sistema e configura a barra de navegação inferior.
+     */
+    private fun configurarBarraNavegacao() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
-
-        // Insets: conteúdo respeita topo/laterais; a barra inferior cola no fundo
-        // e recebe o padding da barra de sistema dentro dela mesma.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(bars.left, bars.top, bars.right, 0)
             bottomNav.setPadding(0, 0, 0, bars.bottom)
             insets
         }
-
-        // Dados recebidos do login
-        usuarioId = intent.getIntExtra("usuarioId", -1)
-        usuarioNome = intent.getStringExtra("usuarioNome")
-        usuarioLogin = intent.getStringExtra("usuarioLogin")
-        token = intent.getIntExtra("token", -1)
-
-        val primeiroNome = usuarioNome?.trim()?.split(" ")?.firstOrNull().orEmpty()
-        findViewById<TextView>(R.id.bemVindoTextView).text =
-            if (primeiroNome.isNotEmpty()) "Bem-vindo, $primeiroNome" else "Bem-vindo"
-        findViewById<TextView>(R.id.tokenTextView).text = token.toString()
-
-        aplicarFundoTicket()
-
-        findViewById<ImageView>(R.id.logoutButton).setOnClickListener { confirmarLogout() }
-
         bottomNav.selectedItemId = R.id.nav_inicio
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -74,6 +63,34 @@ class BoasvindasActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Lê os dados do usuário e o token recebidos do login via Intent.
+     */
+    private fun lerExtras() {
+        usuarioId = intent.getIntExtra("usuarioId", -1)
+        usuarioNome = intent.getStringExtra("usuarioNome")
+        usuarioLogin = intent.getStringExtra("usuarioLogin")
+        token = intent.getIntExtra("token", -1)
+    }
+
+    /**
+     * BIND: exibe a saudação e o token nos TextViews, aplica o fundo de ticket
+     * e liga o botão de logout.
+     */
+    private fun exibirDados() {
+        val primeiroNome = usuarioNome?.trim()?.split(" ")?.firstOrNull().orEmpty()
+        findViewById<TextView>(R.id.bemVindoTextView).text =
+            if (primeiroNome.isNotEmpty()) "Bem-vindo, $primeiroNome" else "Bem-vindo"
+        findViewById<TextView>(R.id.tokenTextView).text = token.toString()
+
+        aplicarFundoTicket()
+
+        findViewById<ImageView>(R.id.logoutButton).setOnClickListener { confirmarLogout() }
+    }
+
+    /**
+     * Desenha o card do token no formato de ticket de cinema.
+     */
     private fun aplicarFundoTicket() {
         val d = resources.displayMetrics.density
         findViewById<View>(R.id.tokenCard).background = TicketDrawable(
@@ -85,6 +102,9 @@ class BoasvindasActivity : AppCompatActivity() {
         )
     }
 
+    /**
+     * Abre outra aba reaproveitando a Activity existente e repassando a sessão.
+     */
     @Suppress("DEPRECATION")
     private fun abrirAba(destino: Class<*>) {
         val intent = Intent(this, destino)
@@ -94,11 +114,12 @@ class BoasvindasActivity : AppCompatActivity() {
         intent.putExtra("usuarioLogin", usuarioLogin)
         intent.putExtra("token", token)
         startActivity(intent)
-        // overridePendingTransition é a API correta para troca de aba sem animação
-        // em API 29 (substituto só existe na API 34+).
         overridePendingTransition(0, 0)
     }
 
+    /**
+     * Mostra o AlertDialog de confirmação antes de encerrar a sessão.
+     */
     private fun confirmarLogout() {
         AlertDialog.Builder(this)
             .setTitle("Sair")
@@ -108,6 +129,9 @@ class BoasvindasActivity : AppCompatActivity() {
             .show()
     }
 
+    /**
+     * Encerra a sessão e volta para a tela de login limpando a pilha.
+     */
     private fun sair() {
         val intent = Intent(this, AuthActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

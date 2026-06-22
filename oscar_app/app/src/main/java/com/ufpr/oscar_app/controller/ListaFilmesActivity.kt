@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ufpr.oscar_app.R
 import com.ufpr.oscar_app.adapter.FilmeAdapter
+import com.ufpr.oscar_app.data.dao.VotoLocalDAO
 import com.ufpr.oscar_app.model.Filme
 import com.ufpr.oscar_app.service.RetrofitClient
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,8 @@ class ListaFilmesActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var erroTextView: TextView
+    private lateinit var votoDAO: VotoLocalDAO
+    private var filmeAdapter: FilmeAdapter? = null
 
     private var usuarioId: Int = -1
     private var usuarioNome: String? = null
@@ -36,7 +39,24 @@ class ListaFilmesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_lista_filmes)
+        configurarBarraNavegacao()
+        lerExtras()
+        referenciarViews()
+        carregarFilmes()
+    }
 
+    /**
+     * Atualiza o selo "SEU VOTO" ao voltar da tela de votar no filme.
+     */
+    override fun onResume() {
+        super.onResume()
+        filmeAdapter?.atualizarVotado(votoDAO.buscarPorUsuario(usuarioId)?.filmeId)
+    }
+
+    /**
+     * Aplica o padding das barras do sistema e configura a barra de navegação inferior.
+     */
+    private fun configurarBarraNavegacao() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -44,24 +64,6 @@ class ListaFilmesActivity : AppCompatActivity() {
             bottomNav.setPadding(0, 0, 0, bars.bottom)
             insets
         }
-
-        // Dados do usuário repassados para manter a sessão entre as abas
-        usuarioId = intent.getIntExtra("usuarioId", -1)
-        usuarioNome = intent.getStringExtra("usuarioNome")
-        usuarioLogin = intent.getStringExtra("usuarioLogin")
-        token = intent.getIntExtra("token", -1)
-
-        recyclerView = findViewById(R.id.recyclerView)
-        progressBar = findViewById(R.id.progressBar)
-        erroTextView = findViewById(R.id.erroTextView)
-
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
-        configurarBottomNav(bottomNav)
-        carregarFilmes()
-    }
-
-    private fun configurarBottomNav(bottomNav: BottomNavigationView) {
         bottomNav.selectedItemId = R.id.nav_filme
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -83,6 +85,30 @@ class ListaFilmesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Lê os dados do usuário e o token recebidos via Intent.
+     */
+    private fun lerExtras() {
+        usuarioId = intent.getIntExtra("usuarioId", -1)
+        usuarioNome = intent.getStringExtra("usuarioNome")
+        usuarioLogin = intent.getStringExtra("usuarioLogin")
+        token = intent.getIntExtra("token", -1)
+    }
+
+    /**
+     * Liga as views da tela, instancia o DAO e configura o RecyclerView.
+     */
+    private fun referenciarViews() {
+        recyclerView = findViewById(R.id.recyclerView)
+        progressBar = findViewById(R.id.progressBar)
+        erroTextView = findViewById(R.id.erroTextView)
+        votoDAO = VotoLocalDAO(this)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+    }
+
+    /**
+     * Abre outra aba reaproveitando a Activity existente e repassando a sessão.
+     */
     @Suppress("DEPRECATION")
     private fun abrirAba(destino: Class<*>) {
         val intent = Intent(this, destino)
@@ -95,6 +121,11 @@ class ListaFilmesActivity : AppCompatActivity() {
         overridePendingTransition(0, 0)
     }
 
+    /**
+     * CHAMADA DE API: GET /filmes.
+     * Carrega a lista de filmes de forma assíncrona, exibindo a ProgressBar
+     * durante o carregamento.
+     */
     private fun carregarFilmes() {
         progressBar.visibility = View.VISIBLE
         recyclerView.visibility = View.GONE
@@ -114,6 +145,10 @@ class ListaFilmesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * BIND: popula o RecyclerView com os filmes, marca o filme votado e abre a tela
+     * de voto ao tocar num item.
+     */
     private fun exibirFilmes(filmes: List<Filme>) {
         if (filmes.isEmpty()) {
             erroTextView.text = "Nenhum filme disponível no momento."
@@ -121,11 +156,14 @@ class ListaFilmesActivity : AppCompatActivity() {
             return
         }
 
-        recyclerView.adapter = FilmeAdapter(filmes) { filme ->
+        val votadoId = votoDAO.buscarPorUsuario(usuarioId)?.filmeId
+        filmeAdapter = FilmeAdapter(filmes, votadoId) { filme ->
             val intent = Intent(this, VotarFilmeActivity::class.java)
             intent.putExtra("filme", filme)
+            intent.putExtra("usuarioId", usuarioId)
             startActivity(intent)
         }
+        recyclerView.adapter = filmeAdapter
         recyclerView.visibility = View.VISIBLE
     }
 }

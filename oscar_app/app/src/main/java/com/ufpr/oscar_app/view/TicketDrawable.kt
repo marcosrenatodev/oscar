@@ -11,10 +11,7 @@ import android.graphics.drawable.Drawable
 
 /**
  * Fundo em forma de ticket de cinema: retângulo arredondado com dois entalhes
- * semicirculares recortados nas laterais (esquerda e direita, no centro vertical).
- *
- * Os entalhes são realmente vazados (transparentes), então o gradiente da tela
- * aparece através deles — diferente de um `<shape>`, que não consegue recortar.
+ * semicirculares vazados nas laterais, deixando o fundo da tela aparecer através deles.
  */
 class TicketDrawable(
     private val fillColor: Int,
@@ -37,10 +34,16 @@ class TicketDrawable(
 
     private val path = Path()
 
+    /**
+     * Reconstrói o contorno do ticket quando o tamanho muda.
+     */
     override fun onBoundsChange(bounds: Rect) {
         construirPath(bounds)
     }
 
+    /**
+     * Monta o path do ticket subtraindo os dois círculos laterais do retângulo.
+     */
     private fun construirPath(b: Rect) {
         val inset = strokeWidthPx / 2f
         val rect = RectF(
@@ -57,11 +60,13 @@ class TicketDrawable(
         val entalheEsquerdo = Path().apply { addCircle(rect.left, cy, notchRadius, Path.Direction.CW) }
         val entalheDireito = Path().apply { addCircle(rect.right, cy, notchRadius, Path.Direction.CW) }
 
-        // Subtrai os círculos do corpo do ticket, criando os recortes laterais.
         path.op(entalheEsquerdo, Path.Op.DIFFERENCE)
         path.op(entalheDireito, Path.Op.DIFFERENCE)
     }
 
+    /**
+     * Desenha o preenchimento e a borda do ticket.
+     */
     override fun draw(canvas: Canvas) {
         canvas.drawPath(path, fillPaint)
         canvas.drawPath(path, strokePaint)

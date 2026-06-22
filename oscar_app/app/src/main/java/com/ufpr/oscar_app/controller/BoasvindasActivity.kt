@@ -11,9 +11,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ufpr.oscar_app.R
+import com.ufpr.oscar_app.data.dao.VotoLocalDAO
+import com.ufpr.oscar_app.service.RetrofitClient
 import com.ufpr.oscar_app.view.TicketDrawable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class BoasvindasActivity : AppCompatActivity() {
 
@@ -86,6 +92,30 @@ class BoasvindasActivity : AppCompatActivity() {
         aplicarFundoTicket()
 
         findViewById<ImageView>(R.id.logoutButton).setOnClickListener { confirmarLogout() }
+
+        sincronizarConfirmacao()
+    }
+
+    /**
+     * CHAMADA DE API: GET /usuarios/{id}/voto.
+     * Se o servidor indica que o usuário já votou, grava o estado localmente para que
+     * as telas de votação fiquem bloqueadas.
+     */
+    private fun sincronizarConfirmacao() {
+        val votoDAO = VotoLocalDAO(this)
+        lifecycleScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.api.consultarVoto(usuarioId)
+                }
+                val corpo = response.body()
+                if (response.isSuccessful && corpo?.jaVotou == true) {
+                    votoDAO.marcarConfirmadoComVotos(usuarioId, corpo.voto?.filmeId, corpo.voto?.diretorId)
+                }
+            } catch (e: Exception) {
+                // Sem conexão: mantém o estado local.
+            }
+        }
     }
 
     /**

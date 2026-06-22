@@ -66,12 +66,20 @@ class VotarFilmeActivity : AppCompatActivity() {
 
     /**
      * Configura o botão de voltar e o registro local do voto no filme.
-     * O voto é persistido em SQLite; o envio real ocorre apenas na confirmação.
+     * Se o voto já foi confirmado, o botão fica bloqueado (bloqueio pós-confirmação).
      */
     private fun configurarAcoes(filme: Filme) {
         findViewById<ImageView>(R.id.backButton).setOnClickListener { finish() }
 
-        findViewById<Button>(R.id.votarButton).setOnClickListener { view ->
+        val votarButton = findViewById<Button>(R.id.votarButton)
+
+        if (votoDAO.buscarPorUsuario(usuarioId)?.confirmado == true) {
+            votarButton.isEnabled = false
+            votarButton.text = "VOTO CONFIRMADO"
+            return
+        }
+
+        votarButton.setOnClickListener { view ->
             votoDAO.salvarFilme(usuarioId, filme)
             Snackbar.make(
                 view,

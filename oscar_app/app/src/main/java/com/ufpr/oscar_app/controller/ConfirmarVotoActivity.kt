@@ -22,6 +22,7 @@ import com.ufpr.oscar_app.data.dao.VotoLocalDAO
 import com.ufpr.oscar_app.model.VotoRequest
 import com.ufpr.oscar_app.service.RetrofitClient
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -175,7 +176,11 @@ class ConfirmarVotoActivity : AppCompatActivity() {
                 }
                 val corpo = response.body()
                 if (response.isSuccessful && corpo?.jaVotou == true) {
-                    votoDAO.marcarConfirmadoComVotos(usuarioId, corpo.voto?.filmeId, corpo.voto?.diretorId)
+                    val filmeId = corpo.voto?.filmeId
+                    val diretorId = corpo.voto?.diretorId
+
+                    votoDAO.marcarConfirmadoComVotos(usuarioId, filmeId, diretorId)
+                    carregarDadosDoVoto(filmeId, diretorId)
                     exibirVotos()
                     travar()
                 }
@@ -183,6 +188,34 @@ class ConfirmarVotoActivity : AppCompatActivity() {
                 // Sem conexão: mantém o estado local.
             }
         }
+    }
+
+    /**
+     * CHAMADAS DE API: GET /filmes e GET /diretores.
+     * Resolve os ids retornados pelo voto confirmado e salva os dados completos
+     * localmente para que a tela exiba nomes e pôster em vez dos ids.
+     */
+    private suspend fun carregarDadosDoVoto(filmeId: String?, diretorId: String?) {
+        if (filmeId.isNullOrBlank() && diretorId.isNullOrBlank()) return
+
+        val (filmes, diretores) = withContext(Dispatchers.IO) {
+            val filmesRequest = async {
+                runCatching { RetrofitClient.api.listarFilmes() }.getOrNull()
+            }
+            val diretoresRequest = async {
+                runCatching { RetrofitClient.api.listarDiretores() }.getOrNull()
+            }
+
+            filmesRequest.await() to diretoresRequest.await()
+        }
+
+        filmes
+            ?.firstOrNull { it.id == filmeId }
+            ?.let { votoDAO.salvarFilme(usuarioId, it) }
+
+        diretores
+            ?.firstOrNull { it.id == diretorId }
+            ?.let { votoDAO.salvarDiretor(usuarioId, it) }
     }
 
     /**

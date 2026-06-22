@@ -88,6 +88,19 @@ class VotoLocalDAO(private val context: Context) {
     }
 
     /**
+     * Remove o voto local de um usuário sem afetar os registros dos demais usuários.
+     */
+    fun excluirPorUsuario(usuarioId: Int) {
+        val db = dbHelper.writableDatabase
+        db.delete(
+            DBHelper.TABLE_VOTO_LOCAL,
+            "usuarioId = ?",
+            arrayOf(usuarioId.toString())
+        )
+        db.close()
+    }
+
+    /**
      * Lê o voto local do usuário, ou null se ainda não houver voto registrado.
      */
     fun buscarPorUsuario(usuarioId: Int): VotoLocal? {

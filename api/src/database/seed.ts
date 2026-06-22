@@ -9,12 +9,12 @@ const usuariosIniciais = [
   { nome: "Usuário 5", login: "usuario5", senha: "123456" }
 ];
 
-export function seedDatabase(): void {
+export function seedDatabase(clearBeforeSeed = false): void {
   createSchema();
 
   const usuarioCount = db.prepare("SELECT COUNT(*) as total FROM usuarios").get() as { total: number };
 
-  if (usuarioCount.total > 0) {
+  if (!clearBeforeSeed && usuarioCount.total > 0) {
     return;
   }
 
@@ -35,6 +35,16 @@ export function seedDatabase(): void {
   `);
 
   const transaction = db.transaction(() => {
+    if (clearBeforeSeed) {
+      db.exec(`
+        DELETE FROM votos;
+        DELETE FROM tokens_votacao;
+        DELETE FROM usuarios;
+        DELETE FROM sqlite_sequence
+        WHERE name IN ('votos', 'tokens_votacao', 'usuarios');
+      `);
+    }
+
     for (const usuario of usuariosIniciais) {
       insertUsuario.run({ ...usuario, criado_em: agora });
     }
@@ -48,8 +58,8 @@ export function seedDatabase(): void {
 
     insertVoto.run({
       usuario_id: 3,
-      filme_id: "10",
-      diretor_id: "15",
+      filme_id: "1",
+      diretor_id: "1",
       token_usado: 42,
       criado_em: agora
     });
@@ -59,6 +69,9 @@ export function seedDatabase(): void {
 }
 
 if (require.main === module) {
-  seedDatabase();
-  console.log("Seed executado com sucesso.");
+  const clearBeforeSeed = process.argv.includes("--clear");
+  seedDatabase(clearBeforeSeed);
+  console.log(clearBeforeSeed
+    ? "Banco limpo e seed executado com sucesso."
+    : "Seed executado com sucesso.");
 }

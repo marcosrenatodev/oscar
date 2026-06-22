@@ -70,6 +70,24 @@ class VotoLocalDAO(private val context: Context) {
     }
 
     /**
+     * Marca como confirmado a partir da resposta do servidor, gravando os ids votados
+     * (usado quando o GET indica que o usuário já votou em uma sessão anterior).
+     */
+    fun marcarConfirmadoComVotos(usuarioId: Int, filmeId: String?, diretorId: String?) {
+        val db = dbHelper.writableDatabase
+        garantirLinha(db, usuarioId)
+
+        val values = ContentValues().apply {
+            put("confirmado", 1)
+            if (filmeId != null) put("filmeId", filmeId)
+            if (diretorId != null) put("diretorId", diretorId)
+        }
+
+        db.update(DBHelper.TABLE_VOTO_LOCAL, values, "usuarioId = ?", arrayOf(usuarioId.toString()))
+        db.close()
+    }
+
+    /**
      * Lê o voto local do usuário, ou null se ainda não houver voto registrado.
      */
     fun buscarPorUsuario(usuarioId: Int): VotoLocal? {

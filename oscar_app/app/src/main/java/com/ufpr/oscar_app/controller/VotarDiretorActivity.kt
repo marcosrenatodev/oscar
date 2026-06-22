@@ -53,6 +53,14 @@ class VotarDiretorActivity : AppCompatActivity() {
     }
 
     /**
+     * Reaplica o bloqueio ao voltar para a aba caso o voto já tenha sido confirmado.
+     */
+    override fun onResume() {
+        super.onResume()
+        travarSeConfirmado()
+    }
+
+    /**
      * Aplica o padding das barras do sistema e configura a barra de navegação inferior.
      */
     private fun configurarBarraNavegacao() {
@@ -175,6 +183,7 @@ class VotarDiretorActivity : AppCompatActivity() {
 
         radioGroup.visibility = View.VISIBLE
         restaurarVotoLocal()
+        travarSeConfirmado()
     }
 
     /**
@@ -255,6 +264,20 @@ class VotarDiretorActivity : AppCompatActivity() {
                 null, null, ContextCompat.getDrawable(this, estrela), null
             )
         }
+    }
+
+    /**
+     * Desabilita a seleção e o botão quando o voto já foi confirmado (bloqueio pós-confirmação).
+     */
+    private fun travarSeConfirmado() {
+        if (votoDAO.buscarPorUsuario(usuarioId)?.confirmado != true) {
+            return
+        }
+        for (i in 0 until radioGroup.childCount) {
+            radioGroup.getChildAt(i).isEnabled = false
+        }
+        votarButton.isEnabled = false
+        votarButton.text = "VOTO CONFIRMADO"
     }
 
     /**

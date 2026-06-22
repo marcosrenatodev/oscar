@@ -17,8 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  ARTIFACT_NAME: oscar-app-debug-apk
-  APK_FILE_NAME: oscar-app-debug.apk
+  ARTIFACT_NAME: oscar-debug-apk
+  APK_FILE_NAME: oscar-debug.apk
   APK_OUTPUT_DIR: build/outputs
   APK_SOURCE_PATH: oscar_app/app/build/outputs/apk/debug/app-debug.apk
 
@@ -26,9 +26,6 @@ jobs:
   build-apk:
     name: Testar e gerar APK
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: oscar_app
     steps:
       - name: Checkout do código
         uses: actions/checkout@v6
@@ -41,15 +38,18 @@ jobs:
 
       - name: Setup do Gradle (com cache)
         uses: gradle/actions/setup-gradle@v6
+        with:
+          build-root-directory: oscar_app
 
       - name: Permissão de execução no gradlew
+        working-directory: oscar_app
         run: chmod +x ./gradlew
 
       - name: Testar e compilar APK de debug
+        working-directory: oscar_app
         run: ./gradlew testDebugUnitTest assembleDebug --stacktrace
 
       - name: Preparar APK
-        working-directory: .
         run: |
           mkdir -p "${APK_OUTPUT_DIR}"
           cp "${APK_SOURCE_PATH}" "${APK_OUTPUT_DIR}/${APK_FILE_NAME}"
@@ -81,6 +81,6 @@ jobs:
         run: |
           gh release create "android-v${{ github.run_number }}" \
             "./apk/${APK_FILE_NAME}" \
-            --title "Oscar App Android v${{ github.run_number }}" \
+            --title "Oscar Android v${{ github.run_number }}" \
             --notes "APK de debug gerado automaticamente pelo workflow run #${{ github.run_number }} (commit ${{ github.sha }})." \
             --repo "${{ github.repository }}"
